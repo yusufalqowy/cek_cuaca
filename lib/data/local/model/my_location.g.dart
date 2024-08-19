@@ -106,12 +106,12 @@ MyLocation _myLocationDeserialize(
   final object = MyLocation(
     address: reader.readStringOrNull(offsets[0]),
     createAt: reader.readDateTimeOrNull(offsets[1]),
+    id: id,
     isActive: reader.readBoolOrNull(offsets[2]) ?? false,
     lat: reader.readDoubleOrNull(offsets[3]),
     lon: reader.readDoubleOrNull(offsets[4]),
     name: reader.readStringOrNull(offsets[5]),
   );
-  object.id = id;
   return object;
 }
 

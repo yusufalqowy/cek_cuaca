@@ -71,9 +71,9 @@ class WeatherRepositoryImpl extends WeatherRepository {
       {required MyLocation location}) async {
     await setActiveLocation(location: location);
     var data = await db.weatherDatas.get(1);
-    if (data != null) {
-      return NetworkResponse.success(data);
-    } else {
+    var today = DateTime.now();
+
+    if (data == null || today.isAfter(data.updateAt)) {
       var response = await api
           .getWeatherForecast(lat: location.lat ?? 0, lon: location.lon ?? 0)
           .then(
@@ -86,13 +86,14 @@ class WeatherRepositoryImpl extends WeatherRepository {
       if (response.status?.isSuccess == true && response.data != null) {
         await db.writeTxn(() async {
           var newData = response.data!;
-          newData.id = 1;
           newData.location.value = location;
           await db.weatherDatas.put(newData);
           await newData.location.save();
         });
       }
       return response;
+    } else {
+      return NetworkResponse.success(data);
     }
   }
 

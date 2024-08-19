@@ -136,18 +136,22 @@ class WeatherItem {
         windSpeed: windSpeed ?? this.windSpeed,
       );
 
+  @ignore
   String get hourFormat {
     return DateTime.tryParse(time ?? "")?.toStringFormat("HH:mm") ?? "";
   }
 
+  @ignore
   String get dayFormat {
     return DateTime.tryParse(time ?? "")?.toStringFormat("EEEE") ?? "";
   }
 
+  @ignore
   String get dateFormat {
     return DateTime.tryParse(time ?? "")?.toStringFormat("MMMM dd") ?? "";
   }
 
+  @ignore
   WeatherCode get weatherEnum {
     return getFromCode(weatherCode ?? 0);
   }

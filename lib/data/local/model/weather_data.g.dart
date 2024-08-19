@@ -28,6 +28,11 @@ const WeatherDataSchema = CollectionSchema(
       name: r'hourly',
       type: IsarType.objectList,
       target: r'WeatherItem',
+    ),
+    r'updateAt': PropertySchema(
+      id: 2,
+      name: r'updateAt',
+      type: IsarType.dateTime,
     )
   },
   estimateSize: _weatherDataEstimateSize,
@@ -106,6 +111,7 @@ void _weatherDataSerialize(
     WeatherItemSchema.serialize,
     object.hourly,
   );
+  writer.writeDateTime(offsets[2], object.updateAt);
 }
 
 WeatherData _weatherDataDeserialize(
@@ -153,13 +159,15 @@ P _weatherDataDeserializeProp<P>(
         allOffsets,
         WeatherItem(),
       )) as P;
+    case 2:
+      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
 Id _weatherDataGetId(WeatherData object) {
-  return object.id ?? Isar.autoIncrement;
+  return object.id;
 }
 
 List<IsarLinkBase<dynamic>> _weatherDataGetLinks(WeatherData object) {
@@ -464,24 +472,8 @@ extension WeatherDataQueryFilter
     });
   }
 
-  QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition> idIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'id',
-      ));
-    });
-  }
-
-  QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition> idIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'id',
-      ));
-    });
-  }
-
   QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition> idEqualTo(
-      Id? value) {
+      Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
@@ -491,7 +483,7 @@ extension WeatherDataQueryFilter
   }
 
   QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition> idGreaterThan(
-    Id? value, {
+    Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -504,7 +496,7 @@ extension WeatherDataQueryFilter
   }
 
   QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition> idLessThan(
-    Id? value, {
+    Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -517,14 +509,69 @@ extension WeatherDataQueryFilter
   }
 
   QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition> idBetween(
-    Id? lower,
-    Id? upper, {
+    Id lower,
+    Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition> updateAtEqualTo(
+      DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updateAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition>
+      updateAtGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updateAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition>
+      updateAtLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updateAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WeatherData, WeatherData, QAfterFilterCondition> updateAtBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updateAt',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -569,7 +616,19 @@ extension WeatherDataQueryLinks
 }
 
 extension WeatherDataQuerySortBy
-    on QueryBuilder<WeatherData, WeatherData, QSortBy> {}
+    on QueryBuilder<WeatherData, WeatherData, QSortBy> {
+  QueryBuilder<WeatherData, WeatherData, QAfterSortBy> sortByUpdateAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updateAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<WeatherData, WeatherData, QAfterSortBy> sortByUpdateAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updateAt', Sort.desc);
+    });
+  }
+}
 
 extension WeatherDataQuerySortThenBy
     on QueryBuilder<WeatherData, WeatherData, QSortThenBy> {
@@ -584,10 +643,28 @@ extension WeatherDataQuerySortThenBy
       return query.addSortBy(r'id', Sort.desc);
     });
   }
+
+  QueryBuilder<WeatherData, WeatherData, QAfterSortBy> thenByUpdateAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updateAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<WeatherData, WeatherData, QAfterSortBy> thenByUpdateAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updateAt', Sort.desc);
+    });
+  }
 }
 
 extension WeatherDataQueryWhereDistinct
-    on QueryBuilder<WeatherData, WeatherData, QDistinct> {}
+    on QueryBuilder<WeatherData, WeatherData, QDistinct> {
+  QueryBuilder<WeatherData, WeatherData, QDistinct> distinctByUpdateAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updateAt');
+    });
+  }
+}
 
 extension WeatherDataQueryProperty
     on QueryBuilder<WeatherData, WeatherData, QQueryProperty> {
@@ -608,6 +685,12 @@ extension WeatherDataQueryProperty
       hourlyProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'hourly');
+    });
+  }
+
+  QueryBuilder<WeatherData, DateTime, QQueryOperations> updateAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updateAt');
     });
   }
 }
