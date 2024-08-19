@@ -1,4 +1,3 @@
-import 'package:cekcuaca/core/routes.dart';
 import 'package:cekcuaca/core/utils.dart';
 import 'package:cekcuaca/data/local/model/my_location.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +12,9 @@ class SelectLocationView extends GetView<SelectLocationLogic> {
   @override
   Widget build(BuildContext context) {
     var scaffoldKey = GlobalKey<ScaffoldState>();
+    var gCamera = const CameraPosition(
+      target: LatLng(-4.395991342413524, 109.81634895756751),
+    );
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -21,12 +23,12 @@ class SelectLocationView extends GetView<SelectLocationLogic> {
       body: Obx(() {
         return GoogleMap(
           markers: {controller.marker.value},
-          initialCameraPosition: const CameraPosition(
-              target: LatLng(-7.0160225998239545, 109.77308897994179),
-              zoom: 14),
-          onMapCreated: (controller) {},
-          onTap: (loc) {
+          initialCameraPosition: gCamera,
+          myLocationEnabled: true,
+          onMapCreated: (con) => controller.gController.complete(con),
+          onTap: (loc) async {
             controller.setMarker(loc);
+            await controller.moveCamera(loc);
             scaffoldKey.currentState?.showBottomSheet(
                 showDragHandle: true, (c) => _showBottomSheet(c, loc));
           },
@@ -83,17 +85,22 @@ class SelectLocationView extends GetView<SelectLocationLogic> {
                           SizedBox(
                             width: double.infinity,
                             child: FilledButton(
-                                onPressed: () async {
-                                  await controller.selectLocation(data);
-                                  Get.snackbar(
-                                      "Info", "Location already added!",
-                                      snackPosition: SnackPosition.BOTTOM);
-                                  Future.delayed(const Duration(seconds: 1),
-                                      () {
-                                    Get.offAndToNamed(Routes.weather);
-                                  });
+                                onPressed: () {
+                                  controller.addLocation(data).then(
+                                    (v) {
+                                      Future.delayed(const Duration(seconds: 1),
+                                          () {
+                                        Get.back(closeOverlays: true);
+                                        Get.back(closeOverlays: true);
+                                      });
+                                    },
+                                    onError: (e) {
+                                      Get.snackbar("Error", e.toString(),
+                                          snackPosition: SnackPosition.BOTTOM);
+                                    },
+                                  );
                                 },
-                                child: const Text("Select Location")),
+                                child: const Text("Add Location")),
                           )
                         ],
                       );

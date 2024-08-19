@@ -8,11 +8,12 @@ abstract class WeatherRepository {
       {required MyLocation location});
   Future<WeatherData?> getWeatherForecastDb();
   Future<void> deleteWeatherForecastDb();
-  Future<void> saveUserLocation({required MyLocation location});
+  Future<void> addLocation({required MyLocation location});
   Stream<List<MyLocation>> getUserLocation();
   Future<List<MyLocation>> getAllUserLocation();
   Future<MyLocation?> getActiveUserLocation();
   Future<bool> deleteUserLocationById({required Id id});
+  Future<bool> deleteUserLocation({required MyLocation location});
   Future<void> deleteAllUserLocation();
   Future<bool> requestLocationPermission();
   Future<MyLocation> getAndSaveCurrentLocation();

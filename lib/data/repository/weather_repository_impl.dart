@@ -27,6 +27,19 @@ class WeatherRepositoryImpl extends WeatherRepository {
   }
 
   @override
+  Future<bool> deleteUserLocation({required MyLocation location}) async {
+    return await db.writeTxn(() async {
+      var loc =
+          await db.myLocations.filter().nameEqualTo(location.name).findFirst();
+      if (loc != null && !loc.isActive) {
+        return await db.myLocations.delete(loc.id!);
+      } else {
+        return false;
+      }
+    });
+  }
+
+  @override
   Stream<List<MyLocation>> getUserLocation() {
     return db.myLocations
         .filter()
@@ -41,40 +54,14 @@ class WeatherRepositoryImpl extends WeatherRepository {
   }
 
   @override
-  Future<void> saveUserLocation({required MyLocation location}) async {
+  Future<void> addLocation({required MyLocation location}) async {
     await db.writeTxn(() async {
       var current =
           await db.myLocations.filter().nameEqualTo(location.name).findFirst();
       if (current == null) {
-        if (location.isActive) {
-          var activeLoc = await db.myLocations
-              .filter()
-              .isActiveEqualTo(true)
-              .build()
-              .findAll();
-
-          for (var item in activeLoc) {
-            if (item != location) {
-              await db.myLocations.put(item.updateActive(false));
-            }
-          }
-        }
-        await db.myLocations.put(location);
+        await db.myLocations.put(location.updateActive(false));
       } else {
-        if (location.isActive) {
-          var activeLoc = await db.myLocations
-              .filter()
-              .isActiveEqualTo(true)
-              .build()
-              .findAll();
-
-          for (var item in activeLoc) {
-            if (item != location) {
-              await db.myLocations.put(item.updateActive(false));
-            }
-          }
-        }
-        await db.myLocations.put(current.updateActive(true));
+        await db.myLocations.put(current);
       }
     });
   }
@@ -82,7 +69,7 @@ class WeatherRepositoryImpl extends WeatherRepository {
   @override
   Future<NetworkResponse<WeatherData>> getWeatherForecastApi(
       {required MyLocation location}) async {
-    await saveUserLocation(location: location.updateActive(true));
+    await setActiveLocation(location: location);
     var data = await db.weatherDatas.get(1);
     if (data != null) {
       return NetworkResponse.success(data);
@@ -158,7 +145,7 @@ class WeatherRepositoryImpl extends WeatherRepository {
             "${placeMark.subAdministrativeArea}, ${placeMark.administrativeArea}, ${placeMark.country}",
         isActive: true,
         createAt: DateTime.now());
-    await saveUserLocation(location: location);
+    await addLocation(location: location);
     return location;
   }
 
@@ -172,5 +159,25 @@ class WeatherRepositoryImpl extends WeatherRepository {
   @override
   Future<List<MyLocation>> getAllUserLocation() async {
     return await db.myLocations.where().findAll();
+  }
+
+  Future<void> setActiveLocation({required MyLocation location}) async {
+    await db.writeTxn(() async {
+      var activeLoc =
+          await db.myLocations.filter().isActiveEqualTo(true).build().findAll();
+
+      for (var item in activeLoc) {
+        if (item != location) {
+          await db.myLocations.put(item.updateActive(false));
+        }
+      }
+      var current =
+          await db.myLocations.filter().nameEqualTo(location.name).findFirst();
+      if (current == null) {
+        await db.myLocations.put(location.updateActive(true));
+      } else {
+        await db.myLocations.put(current.updateActive(true));
+      }
+    });
   }
 }

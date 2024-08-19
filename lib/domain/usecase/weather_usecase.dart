@@ -22,6 +22,11 @@ class WeatherUsecaseImpl extends WeatherUsecase {
   }
 
   @override
+  Future<bool> deleteUserLocation({required MyLocation location}) async {
+    return await repository.deleteUserLocation(location: location);
+  }
+
+  @override
   Stream<List<MyLocation>> getUserLocation() {
     return repository.getUserLocation();
   }
@@ -32,8 +37,8 @@ class WeatherUsecaseImpl extends WeatherUsecase {
   }
 
   @override
-  Future<void> saveUserLocation({required MyLocation location}) async {
-    return await repository.saveUserLocation(location: location);
+  Future<void> addLocation({required MyLocation location}) async {
+    return await repository.addLocation(location: location);
   }
 
   @override

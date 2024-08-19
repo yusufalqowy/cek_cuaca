@@ -989,6 +989,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  time_listener:
+    dependency: "direct main"
+    description:
+      name: time_listener
+      sha256: f5d1f0260c36c90ae89a0957773f05361af8929033811f0eb04eb328512f77ac
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   timezone:
     dependency: transitive
     description:

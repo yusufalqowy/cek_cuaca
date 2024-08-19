@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 const listWeatherData = [
   "http://data.bmkg.go.id/datamkg/MEWS/DigitalForecast/DigitalForecast-Aceh.xml",
   "http://data.bmkg.go.id/datamkg/MEWS/DigitalForecast/DigitalForecast-Bali.xml",
@@ -37,4 +39,8 @@ const listWeatherData = [
 abstract class Constants {
   static const baseUrl = String.fromEnvironment("baseUrl");
   static const apiKey = String.fromEnvironment("apiKey");
+  static const colorEvening = Color(0xff42659b);
+  static const colorMorning = Color(0xff97a1ad);
+  static const colorNight = Color(0xff38406f);
+  static const colorAfternoon = Color(0xff579ae1);
 }

@@ -39,16 +39,30 @@ class WeatherView extends GetView<WeatherLogic> {
                 sliderOpenSize: Get.width * 0.80,
                 isDraggable: false,
                 appBar: SliderAppBar(
-                  appBarColor: Theme.of(context).colorScheme.primaryContainer,
+                  appBarColor:
+                      controller.backgroundColor.value == Colors.blueAccent
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : controller.backgroundColor.value,
                   isTitleCenter: false,
                   appBarPadding:
-                      const EdgeInsets.only(left: 16, right: 16, top: 32),
+                      const EdgeInsets.only(left: 0, right: 16, top: 32),
                   drawerIcon: IconButton(
                       onPressed: () => keys.currentState?.showOrHide(),
-                      icon: const Icon(Icons.location_on_rounded)),
-                  title: Text(
-                    data.location.value?.name ?? "",
-                    style: Theme.of(context).textTheme.titleLarge,
+                      icon: const Icon(Icons.menu)),
+                  title: GestureDetector(
+                    onTap: () => keys.currentState?.showOrHide(),
+                    child: Row(
+                      children: [
+                        Text(
+                          data.location.value?.name ?? "",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        const Icon(Icons.location_on_rounded),
+                      ],
+                    ),
                   ),
                 ),
                 slider: Scaffold(
@@ -78,29 +92,58 @@ class WeatherView extends GetView<WeatherLogic> {
                           );
                         } else if (s.hasData && s.data != null) {
                           return ListView(
-                            padding: const EdgeInsets.all(16),
                             children: [
                               ...List.generate(s.data!.length, (i) {
                                 var item = s.data![i];
 
-                                return ListTile(
-                                  onTap: () => controller.getWeatherForecast(
-                                      loc: item, isRefresh: true),
-                                  title: Text(item.name ?? ""),
-                                  subtitle: Text(item.address ?? ""),
-                                  subtitleTextStyle:
-                                      Theme.of(context).textTheme.bodySmall,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8)),
-                                  trailing: item.isActive
-                                      ? const Icon(Icons.location_on_rounded)
-                                      : null,
-                                  selected: item.isActive,
-                                  selectedTileColor: item.isActive
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .secondaryContainer
-                                      : Theme.of(context).colorScheme.surface,
+                                return Dismissible(
+                                  key: Key(item.id.toString()),
+                                  confirmDismiss: (direction) async {
+                                    await Get.closeCurrentSnackbar();
+                                    var delete =
+                                        await controller.deleteLocation(item);
+                                    if (!delete) {
+                                      Get.snackbar(
+                                          "Error", "Failed to delete location",
+                                          snackPosition: SnackPosition.BOTTOM);
+                                    }
+                                    return delete;
+                                  },
+                                  direction: DismissDirection.startToEnd,
+                                  background: Container(
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                      child: const Row(
+                                        children: [Icon(Icons.delete)],
+                                      )),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    child: ListTile(
+                                      onTap: () =>
+                                          controller.getWeatherForecast(
+                                              loc: item, isRefresh: true),
+                                      title: Text(item.name ?? ""),
+                                      subtitle: Text(item.address ?? ""),
+                                      subtitleTextStyle:
+                                          Theme.of(context).textTheme.bodySmall,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
+                                      trailing: item.isActive
+                                          ? const Icon(
+                                              Icons.location_on_rounded)
+                                          : null,
+                                      selected: item.isActive,
+                                      selectedTileColor: item.isActive
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .secondaryContainer
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .surface,
+                                    ),
+                                  ),
                                 );
                               }),
                             ],
