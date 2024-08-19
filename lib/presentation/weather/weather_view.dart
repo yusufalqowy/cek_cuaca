@@ -39,10 +39,10 @@ class WeatherView extends GetView<WeatherLogic> {
                 sliderOpenSize: Get.width * 0.80,
                 isDraggable: false,
                 appBar: SliderAppBar(
-                  appBarColor:
-                      controller.backgroundColor.value == Colors.blueAccent
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : controller.backgroundColor.value,
+                  appBarColor: controller.backgroundColorInt.value ==
+                          Colors.blueAccent.value
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Color(controller.backgroundColorInt.value),
                   isTitleCenter: false,
                   appBarPadding:
                       const EdgeInsets.only(left: 0, right: 16, top: 32),
@@ -60,7 +60,10 @@ class WeatherView extends GetView<WeatherLogic> {
                         const SizedBox(
                           width: 8,
                         ),
-                        const Icon(Icons.location_on_rounded),
+                        const Icon(
+                          Icons.location_on_rounded,
+                          size: 20,
+                        ),
                       ],
                     ),
                   ),

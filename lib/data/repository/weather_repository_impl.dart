@@ -59,7 +59,11 @@ class WeatherRepositoryImpl extends WeatherRepository {
       var current =
           await db.myLocations.filter().nameEqualTo(location.name).findFirst();
       if (current == null) {
-        await db.myLocations.put(location.updateActive(false));
+        if (location.isActive) {
+          await setActiveLocation(location: location);
+        } else {
+          await db.myLocations.put(location);
+        }
       } else {
         await db.myLocations.put(current);
       }
@@ -69,7 +73,6 @@ class WeatherRepositoryImpl extends WeatherRepository {
   @override
   Future<NetworkResponse<WeatherData>> getWeatherForecastApi(
       {required MyLocation location}) async {
-    await setActiveLocation(location: location);
     var data = await db.weatherDatas.get(1);
     var today = DateTime.now();
 
@@ -85,8 +88,13 @@ class WeatherRepositoryImpl extends WeatherRepository {
           );
       if (response.status?.isSuccess == true && response.data != null) {
         await db.writeTxn(() async {
+          await setActiveLocation(location: location);
+          var loc = await db.myLocations
+              .filter()
+              .nameEqualTo(location.name)
+              .findFirst();
           var newData = response.data!;
-          newData.location.value = location;
+          newData.location.value = loc;
           await db.weatherDatas.put(newData);
           await newData.location.save();
         });
@@ -146,7 +154,7 @@ class WeatherRepositoryImpl extends WeatherRepository {
             "${placeMark.subAdministrativeArea}, ${placeMark.administrativeArea}, ${placeMark.country}",
         isActive: true,
         createAt: DateTime.now());
-    await addLocation(location: location);
+    await addLocation(location: location.updateActive(true));
     return location;
   }
 
@@ -163,22 +171,20 @@ class WeatherRepositoryImpl extends WeatherRepository {
   }
 
   Future<void> setActiveLocation({required MyLocation location}) async {
-    await db.writeTxn(() async {
-      var activeLoc =
-          await db.myLocations.filter().isActiveEqualTo(true).build().findAll();
+    var activeLoc =
+        await db.myLocations.filter().isActiveEqualTo(true).build().findAll();
 
-      for (var item in activeLoc) {
-        if (item != location) {
-          await db.myLocations.put(item.updateActive(false));
-        }
+    for (var item in activeLoc) {
+      if (item != location) {
+        await db.myLocations.put(item.updateActive(false));
       }
-      var current =
-          await db.myLocations.filter().nameEqualTo(location.name).findFirst();
-      if (current == null) {
-        await db.myLocations.put(location.updateActive(true));
-      } else {
-        await db.myLocations.put(current.updateActive(true));
-      }
-    });
+    }
+    var current =
+        await db.myLocations.filter().nameEqualTo(location.name).findFirst();
+    if (current == null) {
+      await db.myLocations.put(location.updateActive(true));
+    } else {
+      await db.myLocations.put(current.updateActive(true));
+    }
   }
 }

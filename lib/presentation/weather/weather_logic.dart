@@ -1,4 +1,3 @@
-import 'package:cekcuaca/core/constants.dart';
 import 'package:cekcuaca/core/network_response.dart';
 import 'package:cekcuaca/core/routes.dart';
 import 'package:cekcuaca/core/utils.dart';
@@ -13,7 +12,7 @@ import 'package:time_listener/time_listener.dart';
 class WeatherLogic extends GetxController {
   WeatherUsecase usecase;
   var getWeatherForecastResponse = NetworkResponse.init<WeatherData>().obs;
-  Rx<Color> backgroundColor = Colors.blueAccent.obs;
+  Rx<int> backgroundColorInt = Colors.blueAccent.value.obs;
   TimeListener? timeListener;
   MyLocation? location;
 
@@ -57,19 +56,12 @@ class WeatherLogic extends GetxController {
       }
     }
 
+    var now = DateTime.now();
+    backgroundColorInt.value = getBackgroundColor(now).value;
+
     timeListener = TimeListener()
-      ..listen((time) {
-        var dateTime = DateTime.utc(2024, 1, 1, 5);
-        var hour = dateTime.hour;
-        if (hour >= 5 && hour <= 11) {
-          backgroundColor.value = Constants.colorMorning;
-        } else if (hour >= 12 && hour <= 15) {
-          backgroundColor.value = Constants.colorAfternoon;
-        } else if (hour >= 16 && hour <= 20) {
-          backgroundColor.value = Constants.colorEvening;
-        } else if (hour >= 21 && hour <= 23 || hour < 5) {
-          backgroundColor.value = Constants.colorNight;
-        }
+      ..listen((dateTime) {
+        backgroundColorInt.value = getBackgroundColor(dateTime).value;
       });
   }
 

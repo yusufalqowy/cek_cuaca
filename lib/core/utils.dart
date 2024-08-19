@@ -1,4 +1,6 @@
+import 'package:cekcuaca/core/constants.dart';
 import 'package:cekcuaca/core/weather_code.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_slider_drawer/flutter_slider_drawer.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
@@ -99,4 +101,19 @@ WeatherCode getFromCode(double code) {
   }
 
   return weather;
+}
+
+Color getBackgroundColor(DateTime date) {
+  var hour = date.hour;
+  if (hour >= 5 && hour <= 11) {
+    return Constants.colorMorning;
+  } else if (hour >= 12 && hour <= 15) {
+    return Constants.colorAfternoon;
+  } else if (hour >= 16 && hour <= 20) {
+    return Constants.colorEvening;
+  } else if (hour >= 21 && hour <= 23 || hour < 5) {
+    return Constants.colorNight;
+  } else {
+    return Colors.blueAccent;
+  }
 }
